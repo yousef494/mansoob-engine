@@ -35,7 +35,7 @@ class MansoobEngine():
         self.stat_log = prop['stat_log']
         self.test_log = prop['test_log']
         self.access_tocken = prop['access_tocken']
-        self.user_id = prop['user_id']
+        self.user_email = prop['user_email']
         self.device_id = prop['device_id']
         
     def main(self):
@@ -127,7 +127,7 @@ class MansoobEngine():
 
     def call_api(self, timestamp, data):
         json_data = {'timestamp': timestamp, 'level': data,
-         'device_id': self.device_id, 'user_email': self.user_id}
+         'device_id': self.device_id, 'user_email': self.user_email}
         headers = {'x-access-token-api': self.access_tocken}
         response = requests.post(self.api_url, data = json_data, headers=headers)
         #response = requests.get(self.api_url, headers=headers)
