@@ -126,9 +126,9 @@ class MansoobEngine():
             return str("NAN")
 
     def call_api(self, timestamp, data):
-        json_data = {'timestamp': timestamp, 'level': data,
-         'device_id': self.device_id, 'user_email': self.user_email}
-        headers = {'x-access-token-api': self.access_tocken}
+        json_data = {'timestamp': timestamp, 'level': data}
+        headers = {'x-access-token-api': self.access_tocken,
+         'device_id': self.device_id}
         response = requests.post(self.api_url, data = json_data, headers=headers)
         #response = requests.get(self.api_url, headers=headers)
         print(response.content)
