@@ -10,7 +10,7 @@ import requests
 
 class MansoobEngine():
     
-    PROP_FILE = '/home/pi/myworkspace/mansoob_v2/wtli.prop'
+    PROP_FILE = '/home/pi/myworkspace/mansoob-engine/wtli.prop'
 
     def __init__(self):
         prop = Properties()
