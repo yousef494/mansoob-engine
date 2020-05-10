@@ -27,7 +27,6 @@ class MansoobEngine():
 
         self.api_url = prop['api_url']
 
-        self.local_file = prop['local_file']
         self.state_file = prop['state_file']
         self.info_log = prop['info_log']
         self.error_log = prop['error_log']

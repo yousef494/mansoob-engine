@@ -1,11 +1,7 @@
-filebase = /var/lib/tomcat8/webapps/wtli/data.wtli 
 tank_hight = 150
-sender = yousef-494@hotmail.com
-reciever = yousef-494@hotmail.com
 prcessing_interval = 300
 set_prcessing_interval = 300
 r_prcessing_interval = 10
-local_file = data.wtli
 state_file = state.wtli
 info_log = info_log.wtli
 error_log = error_log.wtli
