@@ -1,5 +1,5 @@
 import time, subprocess, shlex
-import os
+import os, sys
 from time import gmtime, strftime
 from datetime import datetime
 from array import array
@@ -7,14 +7,19 @@ from Properties import Properties
 import sensor_reader as sensor_reader
 import most_common
 import requests
+import json
 
 class MansoobEngine():
     
+    PROP_FILE_DEV = '/Users/Yousef/Documents/myworkspace/Mansoob V2/mansoob-engine/wtli.prop'
     PROP_FILE = '/home/pi/myworkspace/mansoob-engine/wtli.prop'
 
-    def __init__(self):
+    def __init__(self, env):
         prop = Properties()
-        prop.load(open(self.PROP_FILE))
+        if(env is 'dev'):
+            prop.load(open(self.PROP_FILE_DEV))
+        else:
+            prop.load(open(self.PROP_FILE))
         
         self.counter = 0
         self.tank_hight = int(prop['tank_hight'])        
@@ -28,6 +33,7 @@ class MansoobEngine():
         self.api_url = prop['api_url']
 
         self.state_file = prop['state_file']
+        self.buffer_file = prop['buffer_file']
         self.info_log = prop['info_log']
         self.error_log = prop['error_log']
         self.warning_log = prop['warning_log']
@@ -107,7 +113,7 @@ class MansoobEngine():
                 self.global_pdata = int(data)
                 timestamp = str(datetime.now())
                 # SHOULD BE TO API
-                self.call_api(timestamp,data)
+                self.update_api(timestamp,data)
                 self.storeState(data)
                 self.counter = 0
                 return True
@@ -124,15 +130,40 @@ class MansoobEngine():
             self.log("warning","normalize:NAN, Problem in resolving the data... "+data)
             return str("NAN")
 
+    def update_api(self, timestamp, data):
+        buffer = self.readBuffer()
+        buffer.append( { 'timestamp': timestamp, 'data': data } )
+        for line in buffer :
+            print(line)
+            status = self.call_api(line['timestamp'],line['data'])
+            if(status != 200):
+                self.writeBuffer(buffer)
+                return
+        self.writeBuffer([])#empty the buffer
+
     def call_api(self, timestamp, data):
         json_data = {'timestamp': timestamp, 'level': data
         , 'user_email': self.user_email, 'device_id': self.device_id}
         headers = {'x-access-token-api': self.access_tocken,
          'device_id': self.device_id}
         response = requests.post(self.api_url, data = json_data, headers=headers)
-        #response = requests.get(self.api_url, headers=headers)
-        print(response.content)
+        #print(response.content)
+        print(response.status_code)
+        return response.status_code
 
+    def readBuffer(self):
+        buffer = []
+        try:
+            with open(self.buffer_file, "rb") as rfile:
+                buffer = json.load(rfile)
+                return buffer
+        except Exception, e:
+            return []
+
+    def writeBuffer(self, buffer):
+        with open(self.buffer_file, "w") as ofile:
+            json.dump(buffer, ofile)
+            ofile.close()
 
     def storeState(self, level):
         logTime = str(datetime.now())
@@ -186,6 +217,11 @@ class MansoobEngine():
             print(logTime+":"+message)
             return
 
-
-me= MansoobEngine()
-me.main()
+if __name__ == "__main__":
+    env = ''
+    args = sys.argv
+    if(len(args)>1 and args[1].lower() == 'dev'):
+        print('Working on dev. environment...')
+        env = 'dev'
+    me= MansoobEngine(env)
+    me.main()
